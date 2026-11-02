@@ -1,0 +1,120 @@
+import apiClient from '../../services/apiClient';
+import { ENDPOINTS } from '../../services/endpoints';
+
+export const getCourses = async () => {
+  const response = await apiClient.get(ENDPOINTS.ADMIN.COURSES);
+  return response.data;
+};
+
+export const createCourse = async (title, description) => {
+  const response = await apiClient.post(ENDPOINTS.ADMIN.COURSES, { title, description });
+  return response.data;
+};
+
+export const updateCourse = async (courseId, data) => {
+  const response = await apiClient.patch(ENDPOINTS.ADMIN.COURSE_BY_ID(courseId), data);
+  return response.data;
+};
+
+export const deleteCourse = async (courseId) => {
+  await apiClient.delete(`${ENDPOINTS.ADMIN.COURSES}/${courseId}`);
+};
+
+export const getChapters = async (courseId) => {
+  const response = await apiClient.get(ENDPOINTS.ADMIN.CHAPTERS(courseId));
+  return response.data;
+};
+
+export const createChapter = async (courseId, title, description, parentId = null, order = 1) => {
+  const response = await apiClient.post(ENDPOINTS.ADMIN.CHAPTERS_BASE, { courseId, title, description, parentId, order });
+  return response.data;
+};
+
+
+export const updateChapter = async (chapterId, data) => {
+  // Self-healing: If ID is missing, try to find it in the data object
+  const finalId = chapterId || data._id || data.id;
+  
+  if (!finalId || String(finalId) === 'undefined') {
+    throw new Error('[LEGACY-API] Update failed: Invalid or missing Chapter ID');
+  }
+  const response = await apiClient.put(`${ENDPOINTS.ADMIN.CHAPTERS_BASE}/${finalId}`, data);
+  return response.data;
+};
+
+export const bulkUpdateChapters = async (chapters) => {
+  const response = await apiClient.put(`${ENDPOINTS.ADMIN.CHAPTERS_BASE}/bulk/reorder`, { chapters });
+  return response.data;
+};
+
+export const deleteChapter = async (chapterId) => {
+  await apiClient.delete(`${ENDPOINTS.ADMIN.CHAPTERS_BASE}/${chapterId}`);
+};
+
+export const getQuizzes = async (chapterId) => {
+  const response = await apiClient.get(ENDPOINTS.ADMIN.QUIZZES(chapterId));
+  return response.data;
+};
+
+export const createQuiz = async (data) => {
+  const response = await apiClient.post(ENDPOINTS.ADMIN.QUIZZES_BASE, data);
+  return response.data;
+};
+
+export const updateQuiz = async (quizId, quizData) => {
+  const response = await apiClient.patch(`${ENDPOINTS.ADMIN.QUIZZES_BASE}/${quizId}`, quizData);
+  return response.data;
+};
+
+export const publishQuiz = async (quizId, isPublished = true) => {
+  const response = await apiClient.patch(ENDPOINTS.ADMIN.PUBLISH_QUIZ(quizId), { isPublished });
+  return response.data;
+};
+
+export const deleteQuiz = async (quizId) => {
+  await apiClient.delete(`${ENDPOINTS.ADMIN.QUIZZES_BASE}/${quizId}`);
+};
+
+export const getCourseQuestions = async (courseId) => {
+  const response = await apiClient.get(`${ENDPOINTS.ADMIN.QUESTIONS_BASE}/course/${courseId}`);
+  return response.data;
+};
+
+export const getQuestions = async (chapterId) => {
+  const response = await apiClient.get(ENDPOINTS.ADMIN.QUESTIONS(chapterId));
+  return response.data;
+};
+
+export const createQuestion = async (questionData) => {
+  const response = await apiClient.post(ENDPOINTS.ADMIN.QUESTIONS_BASE, questionData);
+  return response.data;
+};
+
+export const updateQuestion = async (questionId, questionData) => {
+  const response = await apiClient.patch(ENDPOINTS.ADMIN.QUESTION_BY_ID(questionId), questionData);
+  return response.data;
+};
+
+export const deleteQuestion = async (questionId) => {
+  await apiClient.delete(ENDPOINTS.ADMIN.QUESTION_BY_ID(questionId));
+};
+
+export const getLeaderboard = async (quizId) => {
+  const response = await apiClient.get(ENDPOINTS.ADMIN.LEADERBOARD(quizId));
+  return response.data;
+};
+
+export const getAllLeaderboard = async (mode = '') => {
+  const url = mode ? `${ENDPOINTS.ADMIN.LEADERBOARD_ALL}?mode=${mode}` : ENDPOINTS.ADMIN.LEADERBOARD_ALL;
+  const response = await apiClient.get(url);
+  return response.data;
+};
+
+export const deleteLeaderboardRecord = async (resultId) => {
+  await apiClient.delete(`${ENDPOINTS.ADMIN.LEADERBOARD_ALL}/${resultId}`);
+};
+
+export const deleteLeaderboardBulk = async (ids = []) => {
+  const response = await apiClient.post(`${ENDPOINTS.ADMIN.LEADERBOARD_ALL}/bulk-delete`, { ids });
+  return response.data;
+};
